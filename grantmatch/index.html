@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GrantMatch — AI-Powered Grant Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #0f1e35;
+    --navy-mid: #1a2f4a;
+    --teal: #0d9488;
+    --teal-light: #14b8a6;
+    --gold: #d4a847;
+    --cream: #faf7f2;
+    --slate: #64748b;
+    --border: #e2e8f0;
+    --white: #ffffff;
+    --red: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--navy);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    border-bottom: 3px solid var(--teal);
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--teal-light); }
+
+  .tagline {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.4rem;
+    color: var(--navy);
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+  }
+
+  .hero p {
+    color: var(--slate);
+    font-size: 1rem;
+    font-weight: 300;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(15,30,53,0.06);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: var(--navy);
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .card-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--white);
+    font-weight: 400;
+  }
+
+  .card-header .step-badge {
+    background: var(--teal);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .form-body {
+    padding: 1.75rem;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  label .req { color: var(--teal); margin-left: 2px; }
+
+  input, select, textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--navy);
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
+    background: white;
+  }
+
+  textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+
+  select { cursor: pointer; }
+
+  .hint {
+    font-size: 0.75rem;
+    color: var(--slate);
+    font-weight: 300;
+  }
+
+  .submit-row {
+    padding: 1.25rem 1.75rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: #f8fafc;
+  }
+
+  .submit-note {
+    font-size: 0.8rem;
+    color: var(--slate);
+    font-weight: 300;
+  }
+
+  .submit-note strong { color: var(--navy); font-weight: 500; }
+
+  .btn-submit {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: white;
+    background: var(--teal);
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 1.75rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-submit:hover { background: var(--teal-light); }
+  .btn-submit:active { transform: scale(0.98); }
+  .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; transform: none; }
+
+  /* Results */
+  #results-section { margin-top: 2rem; display: none; }
+
+  .results-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    gap: 1rem;
+  }
+
+  .results-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--navy);
+  }
+
+  .results-meta {
+    font-size: 0.8rem;
+    color: var(--slate);
+    white-space: nowrap;
+  }
+
+  .grant-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(15,30,53,0.04);
+    position: relative;
+    transition: box-shadow 0.2s;
+  }
+
+  .grant-card:hover { box-shadow: 0 4px 20px rgba(15,30,53,0.1); }
+
+  .grant-rank {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.4rem;
+    width: 32px;
+    height: 32px;
+    background: var(--navy);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .grant-rank.top { background: var(--gold); color: var(--navy); }
+
+  .grant-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--navy);
+    margin-bottom: 0.3rem;
+    padding-right: 2.5rem;
+  }
+
+  .grant-funder {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+
+  .grant-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .pill {
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    color: var(--slate);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pill.deadline { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .pill.amount { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+  .pill.match { background: #ede9fe; color: #4c1d95; border-color: #ddd6fe; }
+
+  .grant-why {
+    font-size: 0.88rem;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 0.9rem;
+    padding: 0.75rem 1rem;
+    background: #f8fafc;
+    border-left: 3px solid var(--teal);
+    border-radius: 0 6px 6px 0;
+  }
+
+  .grant-why strong {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--teal);
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+  }
+
+  .grant-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--teal);
+    text-decoration: none;
+    border: 1.5px solid var(--teal);
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .grant-link:hover { background: var(--teal); color: white; }
+
+  /* Loading */
+  .loading-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    display: none;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-state p {
+    color: var(--slate);
+    font-size: 0.9rem;
+    font-weight: 300;
+  }
+
+  .loading-state .loading-step {
+    font-size: 0.8rem;
+    color: var(--teal);
+    margin-top: 0.4rem;
+    font-weight: 500;
+    min-height: 1.2em;
+  }
+
+  /* Error */
+  .error-box {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    color: var(--red);
+    font-size: 0.9rem;
+    display: none;
+    margin-top: 1rem;
+  }
+
+  /* Reset btn */
+  .btn-reset {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--slate);
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .btn-reset:hover { border-color: var(--navy); color: var(--navy); }
+
+  .btn-export {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--navy);
+    background: var(--white);
+    border: 1.5px solid var(--navy);
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .btn-export:hover { background: var(--navy); color: var(--white); }
+  .btn-export:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    font-weight: 300;
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.8rem; }
+    .submit-row { flex-direction: column; align-items: stretch; }
+    .btn-submit { justify-content: center; }
+    .results-header { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Grant<span>Match</span></div>
+  <div class="tagline">AI-Powered Grant Discovery</div>
+</header>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>Find the right grants,<br><em>faster.</em></h1>
+    <p>Describe your organization and we'll use AI to search and rank the best-fit grant opportunities available right now.</p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="card" id="form-card">
+    <div class="card-header">
+      <span class="step-badge">Step 1</span>
+      <h2>Tell us about your organization</h2>
+    </div>
+    <div class="form-body">
+      <div class="form-grid">
+
+        <div class="form-group full">
+          <label>Organization Name <span class="req">*</span></label>
+          <input type="text" id="org-name" placeholder="e.g. Riverside Community Foundation" />
+        </div>
+
+        <div class="form-group full">
+          <label>Mission Statement <span class="req">*</span></label>
+          <textarea id="mission" placeholder="Briefly describe your organization's mission and the work you do…"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Primary Cause Area <span class="req">*</span></label>
+          <select id="cause-area">
+            <option value="">Select a cause area…</option>
+            <option>Arts & Culture</option>
+            <option>Children & Youth</option>
+            <option>Community Development</option>
+            <option>Education</option>
+            <option>Environment & Conservation</option>
+            <option>Food Security & Hunger</option>
+            <option>Health & Wellness</option>
+            <option>Housing & Homelessness</option>
+            <option>Human Services</option>
+            <option>Immigration & Refugees</option>
+            <option>LGBTQ+</option>
+            <option>Mental Health</option>
+            <option>Racial Equity & Justice</option>
+            <option>Seniors & Aging</option>
+            <option>Veterans & Military Families</option>
+            <option>Women & Girls</option>
+            <option>Workforce Development</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Organization Size</label>
+          <select id="org-size">
+            <option value="">Select…</option>
+            <option>Volunteer-run (no staff)</option>
+            <option>Small (1–5 staff)</option>
+            <option>Mid-size (6–25 staff)</option>
+            <option>Large (26+ staff)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Annual Budget Range</label>
+          <select id="budget">
+            <option value="">Select…</option>
+            <option>Under $100K</option>
+            <option>$100K – $500K</option>
+            <option>$500K – $1M</option>
+            <option>$1M – $5M</option>
+            <option>Over $5M</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Geographic Focus</label>
+          <input type="text" id="geography" placeholder="e.g. Pittsburgh, PA / Statewide / National" />
+        </div>
+
+        <div class="form-group full">
+          <label>Specific Program or Project Needing Funding</label>
+          <textarea id="project" placeholder="Optional: describe the specific program, project, or initiative you're seeking funding for…" style="min-height:70px;"></textarea>
+          <span class="hint">Adding details here improves match quality significantly.</span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <p class="submit-note">AI will search live grant databases and rank results by <strong>fit, deadline, and eligibility.</strong></p>
+      <button class="btn-submit" id="find-btn" onclick="findGrants()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Find Matching Grants
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" id="loading">
+    <div class="spinner"></div>
+    <p>Searching grant databases and analyzing your profile…</p>
+    <p class="loading-step" id="loading-step">Initializing search…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box" id="error-box"></div>
+
+
+  <!-- Results -->
+  <div id="results-section">
+    <div class="results-header">
+      <h2 id="results-title">Top Grant Matches</h2>
+      <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <span class="results-meta" id="results-meta"></span>
+        <button class="btn-export" id="export-btn" onclick="exportPDF()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export PDF
+        </button>
+        <button class="btn-reset" onclick="resetForm()">← New Search</button>
+      </div>
+    </div>
+    <div id="results-list"></div>
+  </div>
+
+</div>
+
+<footer>
+  GrantMatch uses AI and live web search to surface grant opportunities. Always verify eligibility and deadlines directly with funders.
+</footer>
+
+<script>
+let currentGrants = [];
+let currentOrgName = '';
+
+const loadingSteps = [
+  "Analyzing your organization profile…",
+  "Searching federal grant databases…",
+  "Scanning foundation directories…",
+  "Checking state and local funders…",
+  "Ranking matches by fit and eligibility…",
+  "Compiling results…"
+];
+
+let stepInterval;
+
+function startLoadingSteps() {
+  let i = 0;
+  const el = document.getElementById('loading-step');
+  el.textContent = loadingSteps[0];
+  stepInterval = setInterval(() => {
+    i = (i + 1) % loadingSteps.length;
+    el.textContent = loadingSteps[i];
+  }, 2200);
+}
+
+function stopLoadingSteps() {
+  clearInterval(stepInterval);
+}
+
+function showError(msg) {
+  const box = document.getElementById('error-box');
+  box.textContent = msg;
+  box.style.display = 'block';
+}
+
+
+function resetForm() {
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('form-card').style.display = 'block';
+  document.getElementById('error-box').style.display = 'none';
+  document.getElementById('find-btn').disabled = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function findGrants() {
+  const orgName = document.getElementById('org-name').value.trim();
+  const mission = document.getElementById('mission').value.trim();
+  const causeArea = document.getElementById('cause-area').value;
+
+  if (!orgName || !mission || !causeArea) {
+    showError('Please fill in your Organization Name, Mission Statement, and Cause Area before searching.');
+    return;
+  }
+
+  document.getElementById('error-box').style.display = 'none';
+  document.getElementById('find-btn').disabled = true;
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('results-section').style.display = 'none';
+  startLoadingSteps();
+
+  const orgSize = document.getElementById('org-size').value;
+  const budget = document.getElementById('budget').value;
+  const geography = document.getElementById('geography').value.trim();
+  const project = document.getElementById('project').value.trim();
+
+  const profileSummary = `
+Organization: ${orgName}
+Mission: ${mission}
+Cause Area: ${causeArea}
+${orgSize ? `Size: ${orgSize}` : ''}
+${budget ? `Annual Budget: ${budget}` : ''}
+${geography ? `Geographic Focus: ${geography}` : ''}
+${project ? `Specific Project: ${project}` : ''}
+  `.trim();
+
+  const systemPrompt = `You are an expert nonprofit grant researcher. Use web search to find real, currently-active grant opportunities for nonprofits.`;
+
+  const userPrompt = `Find the best grant opportunities for this nonprofit:\n\n${profileSummary}\n\nSearch for real grants from foundations, government agencies, and other funders that match their cause area, geography, and size. Find 5-7 strong matches.`;
+
+  const jsonPrompt = `Based on the grant research you just did, return ONLY a valid JSON array with no markdown, no backticks, no explanation. Use exactly this structure:
+[
+  {
+    "rank": 1,
+    "title": "Grant Program Name",
+    "funder": "Foundation or Agency Name",
+    "amount": "Award range e.g. $5,000–$25,000",
+    "deadline": "Next deadline or Rolling",
+    "match_strength": "Strong Match",
+    "why": "2-3 sentences on why this fits the organization",
+    "url": "Direct URL to grant page"
+  }
+]
+Return the JSON array only. No other text.`;
+
+  try {
+    // Step 1: Research call with web search enabled
+    const researchResp = await fetch("/api/claude", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }]
+      })
+    });
+
+    const researchData = await researchResp.json();
+    if (!researchResp.ok) throw new Error(researchData.error?.message || 'Research API call failed');
+
+
+    // Step 2: Second call — continue the conversation with the full assistant response intact,
+    // then ask for JSON. We must pass the full content array (including tool_use blocks) back
+    // as the assistant turn so the conversation history is valid.
+    const jsonResp = await fetch("/api/claude", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        system: systemPrompt,
+        messages: [
+          { role: "user", content: userPrompt },
+          { role: "assistant", content: researchData.content },
+          { role: "user", content: jsonPrompt }
+        ]
+      })
+    });
+
+    const jsonData = await jsonResp.json();
+    stopLoadingSteps();
+    document.getElementById('loading').style.display = 'none';
+
+    if (!jsonResp.ok) throw new Error(jsonData.error?.message || 'JSON formatting call failed');
+
+    // Extract and parse JSON from the final response
+    let rawText = jsonData.content
+      .filter(b => b.type === 'text' && b.text)
+      .map(b => b.text)
+      .join('');
+
+
+    const clean = rawText.replace(/```json|```/g, '').trim();
+    const startIdx = clean.indexOf('[');
+    const endIdx = clean.lastIndexOf(']');
+    if (startIdx === -1 || endIdx === -1) throw new Error('No JSON array found in response.');
+    const grants = JSON.parse(clean.substring(startIdx, endIdx + 1));
+    if (!Array.isArray(grants) || grants.length === 0) throw new Error('Empty grant list returned.');
+
+    renderResults(grants, orgName, causeArea);
+
+  } catch (err) {
+    stopLoadingSteps();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('find-btn').disabled = false;
+    showError('Something went wrong searching for grants. Please try again.');
+  }
+}
+
+function renderResults(grants, orgName, causeArea) {
+  currentGrants = grants;
+  currentOrgName = orgName;
+  const section = document.getElementById('results-section');
+  const list = document.getElementById('results-list');
+  const title = document.getElementById('results-title');
+  const meta = document.getElementById('results-meta');
+
+  title.textContent = `Top Matches for ${orgName}`;
+  meta.textContent = `${grants.length} grants found · ${causeArea}`;
+  list.innerHTML = '';
+
+  grants.forEach((g, i) => {
+    const isTop = i === 0;
+    const card = document.createElement('div');
+    card.className = 'grant-card';
+    card.innerHTML = `
+      <div class="grant-rank ${isTop ? 'top' : ''}">${g.rank || i + 1}</div>
+      <div class="grant-title">${escHtml(g.title)}</div>
+      <div class="grant-funder">${escHtml(g.funder)}</div>
+      <div class="grant-pills">
+        ${g.amount ? `<span class="pill amount">💰 ${escHtml(g.amount)}</span>` : ''}
+        ${g.deadline ? `<span class="pill deadline">📅 ${escHtml(g.deadline)}</span>` : ''}
+        ${g.match_strength ? `<span class="pill match">✦ ${escHtml(g.match_strength)}</span>` : ''}
+      </div>
+      <div class="grant-why">
+        <strong>Why this fits</strong>
+        ${escHtml(g.why)}
+      </div>
+      ${g.url ? `<a class="grant-link" href="${escHtml(g.url)}" target="_blank" rel="noopener">
+        View Grant
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>` : ''}
+    `;
+    list.appendChild(card);
+  });
+
+  section.style.display = 'block';
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function exportPDF() {
+  if (!currentGrants.length) return;
+
+  const btn = document.getElementById('export-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 50;
+  const contentW = pageW - margin * 2;
+  let y = margin;
+
+  const NAVY   = [15, 30, 53];
+  const TEAL   = [13, 148, 136];
+  const GOLD   = [212, 168, 71];
+  const SLATE  = [100, 116, 139];
+  const CREAM  = [250, 247, 242];
+  const WHITE  = [255, 255, 255];
+  const BORDER = [226, 232, 240];
+
+  function checkPage(needed) {
+    if (y + needed > pageH - margin) {
+      doc.addPage();
+      y = margin;
+    }
+  }
+
+  function drawWrappedText(text, x, startY, maxW, fontSize, color, lineHeight) {
+    doc.setFontSize(fontSize);
+    doc.setTextColor(...color);
+    const lines = doc.splitTextToSize(String(text || ''), maxW);
+    lines.forEach(line => {
+      checkPage(lineHeight);
+      doc.text(line, x, y);
+      y += lineHeight;
+    });
+    return lines.length;
+  }
+
+  // ── Header bar ──────────────────────────────────────────────
+  doc.setFillColor(...NAVY);
+  doc.rect(0, 0, pageW, 52, 'F');
+  doc.setFillColor(...TEAL);
+  doc.rect(0, 52, pageW, 3, 'F');
+
+  doc.setFontSize(20);
+  doc.setTextColor(...WHITE);
+  doc.setFont('helvetica', 'bold');
+  doc.text('GrantMatch', margin, 34);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(148, 163, 184);
+  doc.text('AI-POWERED GRANT DISCOVERY', margin + 110, 34);
+
+  const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  doc.text(`Generated ${dateStr}`, pageW - margin, 34, { align: 'right' });
+
+  y = 80;
+
+  // ── Report title ─────────────────────────────────────────────
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...NAVY);
+  doc.text(`Grant Opportunities: ${currentOrgName}`, margin, y);
+  y += 10;
+
+  doc.setDrawColor(...TEAL);
+  doc.setLineWidth(1.5);
+  doc.line(margin, y, pageW - margin, y);
+  y += 18;
+
+  // Org profile summary bar
+  const causeArea = document.getElementById('cause-area').value;
+  const geography = document.getElementById('geography').value.trim();
+  const budget    = document.getElementById('budget').value;
+
+  doc.setFillColor(...CREAM);
+  doc.roundedRect(margin, y, contentW, 36, 4, 4, 'F');
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...SLATE);
+
+  const pills = [
+    causeArea && `Cause: ${causeArea}`,
+    geography && `Location: ${geography}`,
+    budget    && `Budget: ${budget}`,
+    `${currentGrants.length} grants matched`
+  ].filter(Boolean);
+
+  let px = margin + 14;
+  pills.forEach(pill => {
+    doc.text(pill.toUpperCase(), px, y + 22);
+    px += doc.getTextWidth(pill.toUpperCase()) + 22;
+  });
+  y += 52;
+
+  // ── Grant cards ───────────────────────────────────────────────
+  currentGrants.forEach((g, i) => {
+    const isTop = i === 0;
+    const cardHeight = 160;
+    checkPage(cardHeight);
+
+    // Card background
+    doc.setFillColor(...WHITE);
+    doc.setDrawColor(...BORDER);
+    doc.setLineWidth(0.75);
+    doc.roundedRect(margin, y, contentW, 0, 4, 4); // just border, height dynamic
+
+    const cardStartY = y;
+
+    // Left accent stripe
+    doc.setFillColor(...(isTop ? GOLD : TEAL));
+    doc.roundedRect(margin, y, 4, 0, 2, 2); // placeholder, will draw after
+
+    // Rank badge
+    const badgeX = pageW - margin - 22;
+    const badgeY = y + 18;
+    doc.setFillColor(...(isTop ? GOLD : NAVY));
+    doc.circle(badgeX, badgeY, 12, 'F');
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...(isTop ? NAVY : WHITE));
+    doc.text(String(g.rank || i + 1), badgeX, badgeY + 3.5, { align: 'center' });
+
+    y += 18;
+
+    // Title
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...NAVY);
+    const titleLines = doc.splitTextToSize(g.title || '', contentW - 60);
+    titleLines.forEach(line => { doc.text(line, margin + 14, y); y += 16; });
+
+    // Funder
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...TEAL);
+    doc.text((g.funder || '').toUpperCase(), margin + 14, y);
+    y += 14;
+
+    // Pills row
+    const pillItems = [
+      g.amount   && { label: g.amount,        color: [6, 95, 70],   bg: [209, 250, 229] },
+      g.deadline && { label: `Due: ${g.deadline}`, color: [146, 64, 14], bg: [254, 243, 199] },
+      g.match_strength && { label: g.match_strength, color: [76, 29, 149], bg: [237, 233, 254] },
+    ].filter(Boolean);
+
+    let pillX = margin + 14;
+    pillItems.forEach(({ label, color, bg }) => {
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'normal');
+      const tw = doc.getTextWidth(label) + 12;
+      doc.setFillColor(...bg);
+      doc.roundedRect(pillX, y - 9, tw, 13, 3, 3, 'F');
+      doc.setTextColor(...color);
+      doc.text(label, pillX + 6, y);
+      pillX += tw + 6;
+    });
+    y += 16;
+
+    // Why this fits box
+    doc.setFillColor(248, 250, 252);
+    const whyLines = doc.splitTextToSize(g.why || '', contentW - 32);
+    const whyBoxH = whyLines.length * 12 + 18;
+    doc.roundedRect(margin + 14, y, contentW - 28, whyBoxH, 3, 3, 'F');
+    doc.setFillColor(...TEAL);
+    doc.roundedRect(margin + 14, y, 3, whyBoxH, 1, 1, 'F');
+
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...TEAL);
+    doc.text('WHY THIS FITS', margin + 22, y + 11);
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(71, 85, 105);
+    let wy = y + 22;
+    whyLines.forEach(line => { doc.text(line, margin + 22, wy); wy += 12; });
+    y += whyBoxH + 6;
+
+    // URL
+    if (g.url) {
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...TEAL);
+      const shortUrl = g.url.length > 70 ? g.url.substring(0, 70) + '…' : g.url;
+      doc.text(shortUrl, margin + 14, y);
+      doc.link(margin + 14, y - 8, doc.getTextWidth(shortUrl), 10, { url: g.url });
+      y += 14;
+    }
+
+    // Draw card border and accent stripe now that we know the height
+    const cardH = y - cardStartY + 8;
+    doc.setFillColor(...WHITE);
+    doc.setDrawColor(...BORDER);
+    doc.setLineWidth(0.75);
+    doc.roundedRect(margin, cardStartY, contentW, cardH, 4, 4, 'S');
+    doc.setFillColor(...(isTop ? GOLD : TEAL));
+    doc.rect(margin, cardStartY + 4, 4, cardH - 8, 'F');
+
+    y += 16;
+  });
+
+  // ── Footer ────────────────────────────────────────────────────
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...SLATE);
+    doc.text(
+      'GrantMatch · Always verify eligibility and deadlines directly with funders.',
+      margin, pageH - 20
+    );
+    doc.text(`Page ${p} of ${totalPages}`, pageW - margin, pageH - 20, { align: 'right' });
+  }
+
+  const filename = `GrantMatch_${currentOrgName.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`;
+  doc.save(filename);
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export PDF`;
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
